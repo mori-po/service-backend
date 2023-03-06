@@ -7,6 +7,52 @@ servers:
   - url: http://staging-api.example.com
     description: StaginAPI endpoint
 paths:
+  /user:
+    post:
+      tags:
+        - User
+      security:
+        - ApiKeyAuth: []
+      summary: ユーザー登録（LINEアカウントとポイントシステムアカウントのマッピング）
+      responses:
+        '200':
+          description: 成功
+        '403':
+          description: 失敗（トークン認証失敗）
+    delete:
+      tags:
+        - User
+      security:
+        - ApiKeyAuth: []
+      summary: ユーザー削除
+      responses:
+        '200':
+          description: 成功
+        '403':
+          description: 失敗（トークン認証失敗）
+  /user/me:
+    get:
+      tags:
+        - User
+      security:
+        - ApiKeyAuth: []
+      summary: 自身のユーザー情報取得
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: number
+
+        '403':
+          description: 失敗（トークン認証失敗）
+        '404':
+          description: 存在しない
+
   /point-voucher/:id:
     get:
       tags:
@@ -117,3 +163,4 @@ components:
       type: apiKey
       in: header
       name: LINE-ID-TOKEN
+      description: getIDToken関数で取得できるトークン https://developers.line.biz/ja/reference/liff/#get-id-token
