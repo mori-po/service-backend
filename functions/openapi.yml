@@ -11,6 +11,8 @@ paths:
     get:
       tags:
         - PointVoucher
+      security:
+        - ApiKeyAuth: []
       parameters:
         - name: id
           in: path
@@ -21,6 +23,38 @@ paths:
       responses:
         '200': # status code
           description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: number
+                  event_name:
+                    type: string
+                  event_description:
+                    type: string
+                  event_image:
+                    type: string
+                    example: https://image.hoge.com/vaucher/1234.jpg
+                  point_amount:
+                    type: number
+                  max_receivable_tickets:
+                    type: number
+                    description: このVaucherで取得できるTicketの最大枚数
+                  received_tickets:
+                    type: number
+                    description: このVaucherで取得したTicketの枚数
+                  event_date:
+                    type: number
+                    example: 1677423600
+                    description: イベント開催日（unix秒）
+                  expired_at:
+                    type: number
+                    example: 1680274800
+                    description: Vaucherの有効期限（unix秒）
+        '404':
+          description: 存在しない
     post:
       tags:
         - PointVoucher
@@ -36,6 +70,8 @@ paths:
       responses:
         '200':
           description: ポイント取得成功
+        '403':
+          description: 有効期限切れ or 取得上限
   /point-tickets:
     get:
       tags:
@@ -46,15 +82,17 @@ paths:
       responses:
         '200':
           description: 成功
+
     post:
       tags:
-        - 'PointTicket'
+        - 'PointTicket Shop'
       security:
         - ApiKeyAuth: []
       summary: 'ポイントチケット利用'
       responses:
         '200':
           description: 成功
+
   /point-tickets/onetime-nonce:
     post:
       tags:
