@@ -4,9 +4,13 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "firebase": "./node_modules/.bin/firebase"
+    "firebase": "./node_modules/.bin/firebase",
+    "serve": "yarn firebase emulators:start",
+    "test": "mocha --reporter spec"
   },
   "devDependencies": {
-    "firebase-tools": "^11.24.0"
+    "firebase-functions-test": "^3.0.0",
+    "firebase-tools": "^11.24.0",
+    "mocha": "^10.2.0"
   }
 }

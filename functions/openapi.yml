@@ -47,13 +47,14 @@ paths:
                 properties:
                   id:
                     type: number
-
+                  name:
+                    type: string
         '403':
           description: 失敗（トークン認証失敗）
         '404':
           description: 存在しない
 
-  /point-voucher/:id:
+  /pointvoucher:
     get:
       tags:
         - PointVoucher
@@ -61,7 +62,7 @@ paths:
         - ApiKeyAuth: []
       parameters:
         - name: id
-          in: path
+          in: query
           schema:
             type: string
           required: true
@@ -83,8 +84,17 @@ paths:
                   event_image:
                     type: string
                     example: https://image.hoge.com/vaucher/1234.jpg
+                  location:
+                    type: string
+                    example: '35.680885, 139.769252'
+                  location_name:
+                    type: string
+                    example: 東京駅
                   point_amount:
                     type: number
+                  max_supply:
+                    type: number
+                    description: 最大発行枚数
                   max_receivable_tickets:
                     type: number
                     description: このVaucherで取得できるTicketの最大枚数
@@ -118,7 +128,7 @@ paths:
           description: ポイント取得成功
         '403':
           description: 有効期限切れ or 取得上限
-  /point-tickets:
+  /pointticket:
     get:
       tags:
         - 'PointTicket'
@@ -128,18 +138,66 @@ paths:
       responses:
         '200':
           description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      example: 1
+                    amount:
+                      type: number
+                      example: 100
+                    used_at:
+                      type: number
+                      example: null
+                      description: 使用した日（unix秒）未使用の場合null
+                    pointvoucher_id:
+                      type: number
+                      example: 1
+                    pointvoucher:
+                      type: object
+                      properties:
+                        id:
+                          type: number
+                          example: 1
+                        event_name:
+                          type: string
+                        event_description:
+                          type: string
+                        event_image:
+                          type: string
+                          example: https://image.hoge.com/vaucher/1234.jpg
+                        location:
+                          type: string
+                          example: '35.680885, 139.769252'
+                        location_name:
+                          type: string
+                          example: 東京駅
+                        point_amount:
+                          type: number
+                        max_supply:
+                          type: number
+                          description: 最大発行枚数
+                        max_receivable_tickets:
+                          type: number
+                          description: このVaucherで取得できるTicketの最大枚数
+                        received_tickets:
+                          type: number
+                          description: このVaucherで取得したTicketの枚数
+                        event_date:
+                          type: number
+                          example: 1677423600
+                          description: イベント開催日（unix秒）
+                        expired_at:
+                          type: number
+                          example: 1680274800
+                          description: Vaucherの有効期限（unix秒）
 
-    post:
-      tags:
-        - 'PointTicket Shop'
-      security:
-        - ApiKeyAuth: []
-      summary: 'ポイントチケット利用'
-      responses:
-        '200':
-          description: 成功
-
-  /point-tickets/onetime-nonce:
+  /pointticket/onetime-nonce:
     post:
       tags:
         - 'PointTicket'
@@ -149,14 +207,134 @@ paths:
       responses:
         '200':
           description: 成功
-  /shops:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nonce:
+                    type: string
+                    example: z8sa1jd9sf9a0sdoa
+
+  /shop:
     get:
       tags:
         - 'Shop'
-      summary: '使える店舗一覧の取得'
+      summary: 'ショップアカウント情報'
+      security:
+        - ApiKeyAuth_Shop: []
       responses:
         '200':
           description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: number
+                  name:
+                    type: string
+                  icon:
+                    type: string
+    post:
+      tags:
+        - 'Shop'
+      summary: 'ショップアカウント新規登録'
+      security:
+        - ApiKeyAuth_Shop: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                icon:
+                  type: string
+      responses:
+        '200':
+          description: 成功
+
+  /shop/pointticket:
+    post:
+      tags:
+        - 'Shop PointTicket'
+      security:
+        - ApiKeyAuth_Shop: []
+      summary: 'ポイントチケット利用'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce:
+                  type: string
+      responses:
+        '200':
+          description: 成功
+        '403':
+          description: 失敗　nonceの期限切れ or 認証失敗
+  /signin:
+    post:
+      tags:
+        - Firebaseauth
+      summary: Firebaseauthのユーザーログイン
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+  /signup/shop:
+    post:
+      tags:
+        - Firebaseauth
+      summary: Firebaseauthのショップアカウントユーザー登録
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                name:
+                  type: string
+                representative_name:
+                  type: string
+                address:
+                  type: string
+                phone_number:
+                  type: string
+                sponsored_unit:
+                  type: number
+      responses:
+        '200':
+          description: 成功
+
 components:
   securitySchemes:
     ApiKeyAuth:
@@ -164,3 +342,8 @@ components:
       in: header
       name: LINE-ID-TOKEN
       description: getIDToken関数で取得できるトークン https://developers.line.biz/ja/reference/liff/#get-id-token
+    ApiKeyAuth_Shop:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: fiwabaseauthのidToken
