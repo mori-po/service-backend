@@ -116,12 +116,15 @@ paths:
         - PointVoucher
       security:
         - ApiKeyAuth: []
-      parameters:
-        - name: id
-          in: path
-          schema:
-            type: string
-          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
       summary: ポイントの取得
       responses:
         '200':
