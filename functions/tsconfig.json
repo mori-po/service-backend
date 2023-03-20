@@ -9,6 +9,6 @@
     "target": "es2017"
   },
   "compileOnSave": true,
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "*.ts"],
   "exclude": ["node_modules", "lib"]
 }
