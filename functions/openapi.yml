@@ -305,8 +305,10 @@ paths:
                   price:
                     type: number
                     example: 100
+        '503':
+          description: 認証失敗
         '403':
-          description: 失敗　nonceの期限切れ or 認証失敗
+          description: 失敗　nonceの期限切れ
   /shop/pointticket/history:
     get:
       tags:
@@ -375,6 +377,10 @@ paths:
                           type: number
                           example: 1680274800
                           description: Vaucherの有効期限（unix秒）
+        '503':
+          description: 認証失敗
+        '404':
+          description: 取得失敗
 
   /signin:
     post:
