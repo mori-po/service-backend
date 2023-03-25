@@ -1,4 +1,4 @@
-import { Voucher } from './voucher'
+import {Voucher} from "./voucher";
 
 export type Ticket = {
   id: string
