@@ -4,3 +4,4 @@ admin.initializeApp();
 export * from "./routes/pointVoucher";
 export * from "./routes/user";
 export * from "./routes/pointTicket";
+export * from "./routes/shop";

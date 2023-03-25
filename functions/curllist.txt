@@ -1,0 +1,3 @@
+curl "http://127.0.0.1:5001/moripo-service-backend/asia-northeast1/user" -X POST -H "line-id-token:"
+curl "http://127.0.0.1:5001/moripo-service-backend/asia-northeast1/pointvoucher?" -d "{\"id\": \"1235\"}" -X POST -H "content-type:application/json" -H "line-id-token:"
+curl "http://127.0.0.1:5001/moripo-service-backend/asia-northeast1/pointticket/onetime-nonce" -d "{\"ids\": [\"1235\"]}" -X POST -H "content-type:application/json" -H "line-id-token:"
