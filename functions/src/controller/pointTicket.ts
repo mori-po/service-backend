@@ -50,3 +50,8 @@ export const listHoldingPointTickets = async (req: Request, res: Response) => {
 export const generateOnetimeNonce = async (req: Request, res: Response) => {
   res.json({nonce: "doaf0psadjfa81"});
 };
+
+export const getPointTicketPrice = async (req: Request, res: Response) => {
+  // TODO: nonceが有効でない場合403エラー
+  res.json({price: 100})
+};

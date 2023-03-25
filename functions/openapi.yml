@@ -282,6 +282,31 @@ paths:
           description: 成功
         '403':
           description: 失敗　nonceの期限切れ or 認証失敗
+    get:
+      tags:
+        - 'Shop PointTicket'
+      security:
+        - ApiKeyAuth_Shop: []
+      parameters:
+        - name: nonce
+          in: query
+          schema:
+            type: string
+          required: true
+      summary: 'ポイントチケット情報'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  price:
+                    type: number
+                    example: 100
+        '403':
+          description: 失敗　nonceの期限切れ or 認証失敗
   /signin:
     post:
       tags:
