@@ -1,7 +1,10 @@
 import * as functions from "firebase-functions";
-import { cors } from "../utils/cors";
-import { getPointTicketPrice, listUsedPointTicketsHistory } from "../controller/pointTicket";
-import { verifyAuthHeader } from "../utils/auth";
+import {cors} from "../utils/cors";
+import {
+  getPointTicketPrice,
+  listUsedPointTicketsHistory,
+} from "../controller/pointTicket";
+import {verifyAuthHeader} from "../utils/auth";
 
 export const shop = functions
   .region("asia-northeast1")
@@ -14,12 +17,16 @@ export const shop = functions
           await getPointTicketPrice(req, res);
           return;
         }
+        break;
       case "/pointticket/history":
         if (req.method === "GET") {
           req = await verifyAuthHeader(req, res);
           await listUsedPointTicketsHistory(req, res);
           return;
         }
+        break;
+      default:
+        break;
       }
 
       res.statusCode = 404;
