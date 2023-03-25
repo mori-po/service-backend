@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 import { cors } from "../utils/cors";
-import { getPointTicketPrice } from "../controller/pointTicket";
+import { getPointTicketPrice, listUsedPointTicketsHistory } from "../controller/pointTicket";
 import { verifyAuthHeader } from "../utils/auth";
 
 export const shop = functions
@@ -12,6 +12,12 @@ export const shop = functions
         if (req.method === "GET") {
           req = await verifyAuthHeader(req, res);
           await getPointTicketPrice(req, res);
+          return;
+        }
+      case "/pointticket/history":
+        if (req.method === "GET") {
+          req = await verifyAuthHeader(req, res);
+          await listUsedPointTicketsHistory(req, res);
           return;
         }
       }
