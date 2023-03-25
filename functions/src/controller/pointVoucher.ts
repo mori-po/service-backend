@@ -40,7 +40,7 @@ export const earnPointTicket = async (req: ExtendRequest, res: Response) => {
     }
 
     const voucher = (
-      await firestore.collection("pointVoucher").doc(id).get()
+      await firestore.collection("pointVouchers").doc(id).get()
     ).data() as Voucher;
     if (!voucher) {
       res.sendStatus(404);
@@ -53,7 +53,7 @@ export const earnPointTicket = async (req: ExtendRequest, res: Response) => {
 
     const tickets: Ticket[] = (
       await firestore
-        .collection("pointTicket")
+        .collection("pointTickets")
         .where("user_id", "==", req.currentUser.sub)
         .where("pointVoucher_id", "==", id)
         .get()
@@ -69,14 +69,38 @@ export const earnPointTicket = async (req: ExtendRequest, res: Response) => {
       id: ticketId,
       user_id: req.currentUser.sub,
       amount: voucher.point_amount,
-      usedAt: null,
+      used_at: null,
       pointVoucher_id: id,
       pointVoucher: voucher,
     };
-    await firestore.collection("pointTicket").doc(ticketId).set(ticket);
+    await firestore.collection("pointTickets").doc(ticketId).set(ticket);
 
     res.sendStatus(200);
   } catch (error) {
     res.sendStatus(403);
+  }
+};
+
+export const mockPointVoucher = async (_: Request, res: Response) => {
+  const id = v4();
+  try {
+    const voucher = firestore.collection("pointVouchers");
+    await voucher.doc(id).set({
+      id,
+      event_name: "ゴミ拾い",
+      event_description: "みんなでゴミ拾いをしよう！\nみんなで楽しもう！",
+      event_image:
+        "https://4.bp.blogspot.com/--EobH7fv_OQ/VVGVEMZ0III/AAAAAAAAthI/Lgt7o2KH5QE/s400/gomihiroi_boy.png",
+      location: "35.680885, 139.769252",
+      location_name: "東京駅",
+      point_amount: 200,
+      max_supply: 100,
+      max_receivable_tickets: 2,
+      event_date: 1677423600,
+      expired_at: 1680274800,
+    });
+    res.sendStatus(200);
+  } catch (error) {
+    res.sendStatus(503);
   }
 };

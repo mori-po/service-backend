@@ -4,7 +4,7 @@ export type Ticket = {
   id: string
   user_id: string
   amount: number
-  usedAt: number | null
+  used_at: number | null
   pointVoucher_id: string
   pointVoucher: Voucher
 }

@@ -4,6 +4,7 @@ import {
   generateOnetimeNonce,
   listHoldingPointTickets,
 } from "../controller/pointTicket";
+import {verifyAuthHeader} from "../utils/auth";
 
 export const pointticket = functions
   .region("asia-northeast1")
@@ -12,12 +13,14 @@ export const pointticket = functions
       switch (req.path) {
       case "/":
         if (req.method === "GET") {
+          req = await verifyAuthHeader(req, res);
           await listHoldingPointTickets(req, res);
           return;
         }
         break;
       case "/onetime-nonce":
         if (req.method === "POST") {
+          req = await verifyAuthHeader(req, res);
           await generateOnetimeNonce(req, res);
           return;
         }

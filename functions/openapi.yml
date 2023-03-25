@@ -207,6 +207,16 @@ paths:
       security:
         - ApiKeyAuth: []
       summary: 'ポイントチケット利用のためのワンタイムナンスの発行'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  example: ['87083', '31ip9s']
       responses:
         '200':
           description: 成功
@@ -218,6 +228,9 @@ paths:
                   nonce:
                     type: string
                     example: z8sa1jd9sf9a0sdoa
+                  expired_at:
+                    type: number
+                    example: 1679733643
 
   /shop:
     get:

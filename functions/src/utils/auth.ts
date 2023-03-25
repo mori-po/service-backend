@@ -4,7 +4,7 @@ import {ExtendRequest, LineVerifiedData} from "../../types/http";
 
 export const verifyAuthHeader = async (req: ExtendRequest, res: Response) => {
   const lineToken = req.headers["line-id-token"];
-  // const firebaseAuthToken = req.headers["Authorization"];
+  // const firebaseAuthToken = req.headers['Authorization']
 
   if (lineToken) {
     try {
@@ -20,6 +20,7 @@ export const verifyAuthHeader = async (req: ExtendRequest, res: Response) => {
       );
       req.currentUser = data;
     } catch (error) {
+      console.log(error);
       res.sendStatus(503);
       throw new Error("");
     }
