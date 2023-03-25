@@ -1,4 +1,4 @@
-import { Request as FirebaseRequest } from 'firebase-functions/v1/https'
+import {Request as FirebaseRequest} from "firebase-functions/v1/https";
 
 export type LineVerifiedData = {
   iss: string
