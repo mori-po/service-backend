@@ -282,6 +282,106 @@ paths:
           description: 成功
         '403':
           description: 失敗　nonceの期限切れ or 認証失敗
+    get:
+      tags:
+        - 'Shop PointTicket'
+      security:
+        - ApiKeyAuth_Shop: []
+      parameters:
+        - name: nonce
+          in: query
+          schema:
+            type: string
+          required: true
+      summary: 'ポイントチケット情報'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  price:
+                    type: number
+                    example: 100
+        '503':
+          description: 認証失敗
+        '403':
+          description: 失敗　nonceの期限切れ
+  /shop/pointticket/history:
+    get:
+      tags:
+        - 'Shop PointTicket'
+      security:
+        - ApiKeyAuth: []
+      summary: 'あるショップで利用されたポイントチケットの履歴一覧'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      example: 1
+                    amount:
+                      type: number
+                      example: 100
+                    used_at:
+                      type: number
+                      example: null
+                      description: 使用した日（unix秒）未使用の場合null
+                    pointvoucher_id:
+                      type: number
+                      example: 1
+                    pointvoucher:
+                      type: object
+                      properties:
+                        id:
+                          type: number
+                          example: 1
+                        event_name:
+                          type: string
+                        event_description:
+                          type: string
+                        event_image:
+                          type: string
+                          example: https://image.hoge.com/vaucher/1234.jpg
+                        location:
+                          type: string
+                          example: '35.680885, 139.769252'
+                        location_name:
+                          type: string
+                          example: 東京駅
+                        point_amount:
+                          type: number
+                        max_supply:
+                          type: number
+                          description: 最大発行枚数
+                        max_receivable_tickets:
+                          type: number
+                          description: このVaucherで取得できるTicketの最大枚数
+                        received_tickets:
+                          type: number
+                          description: このVaucherで取得したTicketの枚数
+                        event_date:
+                          type: number
+                          example: 1677423600
+                          description: イベント開催日（unix秒）
+                        expired_at:
+                          type: number
+                          example: 1680274800
+                          description: Vaucherの有効期限（unix秒）
+        '503':
+          description: 認証失敗
+        '404':
+          description: 取得失敗
+
   /signin:
     post:
       tags:

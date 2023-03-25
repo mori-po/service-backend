@@ -25,6 +25,10 @@
         {
           "source": "/user",
           "functions": "user"
+        },
+        {
+          "source": "/shop",
+          "functions": "shop"
         }
       ]
     }
