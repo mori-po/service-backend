@@ -96,7 +96,7 @@ export const getPointTicketPrice = async (
     if (!req.currentShop?.uid || !req.query.nonce) throw "invalid request";
 
     const nonce = (
-      await firestore.collection("pointTicketNonces").doc(req.body.nonce).get()
+      await firestore.collection("pointTicketNonces").doc(req.query.nonce).get()
     ).data();
     if (!nonce || dayjs().unix() > nonce.expired_at) throw "invalid nonce";
 
