@@ -1,10 +1,13 @@
+import * as admin from "firebase-admin";
 import {Response} from "firebase-functions/v1";
 import axios from "axios";
 import {ExtendRequest, LineVerifiedData} from "../../types/http";
 
+const auth = admin.auth();
+
 export const verifyAuthHeader = async (req: ExtendRequest, res: Response) => {
   const lineToken = req.headers["line-id-token"];
-  // const firebaseAuthToken = req.headers['Authorization']
+  const firebaseAuthToken = req.headers["authorization"];
 
   if (lineToken) {
     try {
@@ -20,7 +23,14 @@ export const verifyAuthHeader = async (req: ExtendRequest, res: Response) => {
       );
       req.currentUser = data;
     } catch (error) {
-      console.log(error);
+      res.sendStatus(503);
+      throw new Error("");
+    }
+  } else if (firebaseAuthToken) {
+    try {
+      const data: any = await auth.verifyIdToken(String(firebaseAuthToken));
+      req.currentShop = data;
+    } catch (error) {
       res.sendStatus(503);
       throw new Error("");
     }

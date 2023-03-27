@@ -1,6 +1,5 @@
 import * as admin from "firebase-admin";
 import {Response} from "firebase-functions/v1";
-import {Request} from "firebase-functions/v1/https";
 import {ExtendRequest} from "../../types/http";
 import {Ticket} from "../../types/ticket";
 import * as uuid from "uuid";
@@ -34,53 +33,25 @@ export const listHoldingPointTickets = async (
 };
 
 export const listUsedPointTicketsHistory = async (
-  req: Request,
+  req: ExtendRequest,
   res: Response
 ) => {
-  // TODO: リクエストヘッダのショップ情報を使って絞り込む
-  res.json([
-    {
-      id: 123,
-      amount: 100,
-      used_at: 1677423600,
-      pointVoucher_id: 1,
-      pointVoucher: {
-        id: 1,
-        event_name: "ゴミ拾い",
-        event_description: "みんなでゴミ拾いをしよう！\nみんなで楽しもう！",
-        event_image:
-          "https://4.bp.blogspot.com/--EobH7fv_OQ/VVGVEMZ0III/AAAAAAAAthI/Lgt7o2KH5QE/s400/gomihiroi_boy.png",
-        location: "35.680885, 139.769252",
-        location_name: "東京駅",
-        point_amount: 100,
-        max_supply: 100,
-        max_receivable_tickets: 2,
-        event_date: 1677423600,
-        expired_at: 1680274800,
-      },
-    },
-    {
-      id: 123,
-      amount: 100,
-      used_at: 1677423600,
-      pointVoucher_id: 2,
-      pointVoucher: {
-        id: 2,
-        event_name: "ゴミ拾い２",
-        event_description:
-          "みんなでたくさんゴミ拾いをしよう！\nみんなで楽しもう！",
-        event_image:
-          "https://4.bp.blogspot.com/--EobH7fv_OQ/VVGVEMZ0III/AAAAAAAAthI/Lgt7o2KH5QE/s400/gomihiroi_boy.png",
-        location: "35.680885, 139.769252",
-        location_name: "東京駅",
-        point_amount: 100,
-        max_supply: 100,
-        max_receivable_tickets: 2,
-        event_date: 1677423600,
-        expired_at: 1680274800,
-      },
-    },
-  ]);
+  try {
+    if (!req.currentShop?.uid) throw "invalid request";
+
+    const ticketsKV: Ticket[] = [];
+    const tickets = await firestore
+      .collection("pointTickets")
+      .where("shop_id", "==", req.currentShop.uid)
+      .get();
+    tickets.forEach((doc) => {
+      ticketsKV.push(doc.data() as any);
+    });
+
+    res.json(ticketsKV);
+  } catch (error) {
+    res.sendStatus(503);
+  }
 };
 
 export const generateOnetimeNonce = async (
@@ -97,8 +68,8 @@ export const generateOnetimeNonce = async (
       .where("id", "in", req.body.ids)
       .get();
     tickets.forEach((ticket) => {
-      const ticketVK: Ticket = ticket.data() as any;
-      if (ticketVK.used_at || ticketVK.user_id !== req.currentUser?.sub) {
+      const ticketKV: Ticket = ticket.data() as any;
+      if (ticketKV.used_at || ticketKV.user_id !== req.currentUser?.sub) {
         throw null;
       }
     });
@@ -117,7 +88,75 @@ export const generateOnetimeNonce = async (
   }
 };
 
-export const getPointTicketPrice = async (req: Request, res: Response) => {
-  // TODO: nonceが有効でない場合403エラー
-  res.json({price: 100});
+export const getPointTicketPrice = async (
+  req: ExtendRequest,
+  res: Response
+) => {
+  try {
+    if (!req.currentShop?.uid || !req.query.nonce) throw "invalid request";
+
+    const nonce = (
+      await firestore.collection("pointTicketNonces").doc(req.body.nonce).get()
+    ).data();
+    if (!nonce || dayjs().unix() > nonce.expired_at) throw "invalid nonce";
+
+    const pointTickets = await firestore
+      .collection("pointTickets")
+      .where("id", "in", nonce.point_ticket_ids)
+      .get();
+    if (pointTickets.docs.length === 0) throw "no tickets";
+    let price = 0;
+    pointTickets.forEach((ticket) => {
+      const ticketVK: Ticket = ticket.data() as any;
+      if (ticketVK.used_at || ticketVK.shop_id) {
+        throw "ticket already used";
+      }
+      price += ticketVK.amount;
+    });
+
+    res.json({price});
+  } catch (error) {
+    res.sendStatus(403);
+  }
+};
+
+export const usePointTicket = async (req: ExtendRequest, res: Response) => {
+  try {
+    if (!req.currentShop?.uid || !req.body.nonce) throw "invalid request";
+
+    const shop = (
+      await firestore.collection("shops").doc(req.currentShop.uid).get()
+    ).data();
+    if (!shop || !shop.active) throw "invalid shop";
+
+    const nonce = (
+      await firestore.collection("pointTicketNonces").doc(req.body.nonce).get()
+    ).data();
+    if (!nonce || dayjs().unix() > nonce.expired_at) throw "invalid nonce";
+    const pointTickets = await firestore
+      .collection("pointTickets")
+      .where("id", "in", nonce.point_ticket_ids)
+      .get();
+    if (pointTickets.docs.length === 0) throw "no tickets";
+    pointTickets.forEach((ticket) => {
+      const ticketKV: Ticket = ticket.data() as any;
+      if (ticketKV.used_at || ticketKV.shop_id) {
+        throw "ticket already used";
+      }
+    });
+
+    const now = dayjs().unix();
+
+    pointTickets.forEach(async (ticket) => {
+      await firestore.collection("pointTickets").doc(ticket.id).update({
+        used_at: now,
+        shop_id: req.currentShop?.uid,
+      });
+    });
+
+    res.json({status: "success"});
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(403);
+  }
 };
