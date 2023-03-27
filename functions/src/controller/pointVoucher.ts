@@ -17,7 +17,7 @@ export const findPointVaucher = async (req: Request, res: Response) => {
     }
 
     const voucher = (
-      await firestore.collection("pointVoucher").doc(id).get()
+      await firestore.collection("pointVouchers").doc(id).get()
     ).data();
 
     if (voucher) {
@@ -70,6 +70,7 @@ export const earnPointTicket = async (req: ExtendRequest, res: Response) => {
       user_id: req.currentUser.sub,
       amount: voucher.point_amount,
       used_at: null,
+      shop_id: null,
       pointVoucher_id: id,
       pointVoucher: voucher,
     };
