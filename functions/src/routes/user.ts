@@ -10,6 +10,7 @@ export const user = functions
       switch (req.path) {
       case "/":
         if (req.method === "POST") {
+          console.log(req.headers);
           req = await verifyAuthHeader(req, res);
           await signupUser(req, res);
           return;
