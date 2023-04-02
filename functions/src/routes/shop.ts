@@ -6,12 +6,20 @@ import {
   listUsedPointTicketsHistory,
 } from "../controller/pointTicket";
 import {verifyAuthHeader} from "../utils/auth";
+import {shopMe} from "../controller/shop";
 
 export const shop = functions
   .region("asia-northeast1")
   .https.onRequest((req, res) => {
     cors(req, res, async () => {
       switch (req.path) {
+      case "/":
+        if (req.method === "GET") {
+          req = await verifyAuthHeader(req, res);
+          await shopMe(req, res);
+          return;
+        }
+        break;
       case "/pointticket":
         if (req.method === "GET") {
           req = await verifyAuthHeader(req, res);

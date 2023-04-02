@@ -93,10 +93,16 @@ export const getPointTicketPrice = async (
   res: Response
 ) => {
   try {
-    if (!req.currentShop?.uid || !req.query.nonce) throw "invalid request";
+    if (
+      !req.currentShop?.uid ||
+      !req.query.nonce ||
+      typeof req.query.nonce !== "string"
+    ) {
+      throw "invalid request";
+    }
 
     const nonce = (
-      await firestore.collection("pointTicketNonces").doc(req.body.nonce).get()
+      await firestore.collection("pointTicketNonces").doc(req.query.nonce).get()
     ).data();
     if (!nonce || dayjs().unix() > nonce.expired_at) throw "invalid nonce";
 
@@ -116,6 +122,7 @@ export const getPointTicketPrice = async (
 
     res.json({price});
   } catch (error) {
+    console.log(error);
     res.sendStatus(403);
   }
 };

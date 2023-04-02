@@ -52,7 +52,7 @@
     },
     "ui": {
       "enabled": true,
-      "port": 3001
+      "port": 3003
     },
     "auth": {
       "port": 9099
