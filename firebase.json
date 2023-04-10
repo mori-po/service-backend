@@ -12,6 +12,24 @@
       "predeploy": [
         "npm --prefix \"$RESOURCE_DIR\" run lint",
         "npm --prefix \"$RESOURCE_DIR\" run build"
+      ],
+      "rewrites": [
+        {
+          "source": "/pointvoucher",
+          "functions": "pointvoucher"
+        },
+        {
+          "source": "/pointticket",
+          "functions": "pointticket"
+        },
+        {
+          "source": "/user",
+          "functions": "user"
+        },
+        {
+          "source": "/shop",
+          "functions": "shop"
+        }
       ]
     }
   ],
@@ -34,7 +52,10 @@
     },
     "ui": {
       "enabled": true,
-      "port": 3001
+      "port": 3003
+    },
+    "auth": {
+      "port": 9099
     },
     "singleProjectMode": true
   }

@@ -1,0 +1,6 @@
+curl "http://127.0.0.1:5001/moripo-service-backend/asia-northeast1/user" -X POST -H "line-id-token:"
+curl "http://127.0.0.1:5001/moripo-service-backend/asia-northeast1/pointvoucher" -d "{\"id\": \"1235\"}" -X POST -H "content-type:application/json" -H "line-id-token:"
+curl "http://127.0.0.1:5001/moripo-service-backend/asia-northeast1/pointticket/onetime-nonce" -d "{\"ids\": [\"1235\"]}" -X POST -H "content-type:application/json" -H "line-id-token:"
+
+curl "http://127.0.0.1:5001/moripo-service-backend/asia-northeast1/shop/pointticket" -X POST -H "Authorization:"
+curl "http://127.0.0.1:5001/moripo-service-backend/asia-northeast1/pointticket/onetime-nonce" -d "{\"ids\": [\"efbef736-2e0d-4ecb-a62c-11f26863cf44\"]}" -X POST -H "content-type:application/json" -H "line-id-token:"
