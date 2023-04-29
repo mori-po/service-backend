@@ -1,7 +1,12 @@
 import * as admin from "firebase-admin";
 import {Response} from "firebase-functions/v1";
 import axios from "axios";
-import {ExtendRequest, LineVerifiedData} from "../../types/http";
+import {
+  ExtendRequest,
+  FirebaseAuthData,
+  LineVerifiedData,
+} from "../../types/http";
+import {errorTypes} from "./errorHandling";
 
 const auth = admin.auth();
 
@@ -22,18 +27,23 @@ export const verifyAuthHeader = async (req: ExtendRequest, res: Response) => {
         }
       );
       req.currentUser = data;
-    } catch (error) {
-      res.sendStatus(503);
-      throw new Error("");
+    } catch (detail) {
+      res.status(403).send({...errorTypes[403], detail});
+      process.exit();
     }
   } else if (firebaseAuthToken) {
     try {
-      const data: any = await auth.verifyIdToken(String(firebaseAuthToken));
+      const data = (await auth.verifyIdToken(
+        String(firebaseAuthToken)
+      )) as FirebaseAuthData;
       req.currentShop = data;
-    } catch (error) {
-      res.sendStatus(503);
-      throw new Error("");
+    } catch (detail) {
+      res.status(403).send({...errorTypes[403], detail});
+      process.exit();
     }
+  } else {
+    res.status(403).send({...errorTypes[403]});
+    process.exit();
   }
 
   return req;

@@ -4,6 +4,7 @@ import {ExtendRequest} from "../../types/http";
 import {Ticket} from "../../types/ticket";
 import * as uuid from "uuid";
 import * as dayjs from "dayjs";
+import {errorTypes} from "../utils/errorHandling";
 
 const firestore = admin.firestore();
 
@@ -13,7 +14,7 @@ export const listHoldingPointTickets = async (
 ) => {
   try {
     if (!req.currentUser) {
-      res.sendStatus(403);
+      res.status(401).send(errorTypes[401]);
       return;
     }
 
@@ -23,12 +24,12 @@ export const listHoldingPointTickets = async (
       .where("user_id", "==", req.currentUser.sub)
       .get();
     tickets.forEach((doc) => {
-      ticketsKV.push(doc.data() as any);
+      ticketsKV.push(doc.data() as Ticket);
     });
 
     res.json(ticketsKV);
   } catch (error) {
-    res.sendStatus(404);
+    res.status(500).send(errorTypes[500]);
   }
 };
 
@@ -37,7 +38,10 @@ export const listUsedPointTicketsHistory = async (
   res: Response
 ) => {
   try {
-    if (!req.currentShop?.uid) throw "invalid request";
+    if (!req.currentShop?.uid) {
+      res.status(401).send(errorTypes[401]);
+      return;
+    }
 
     const ticketsKV: Ticket[] = [];
     const tickets = await firestore
@@ -45,12 +49,12 @@ export const listUsedPointTicketsHistory = async (
       .where("shop_id", "==", req.currentShop.uid)
       .get();
     tickets.forEach((doc) => {
-      ticketsKV.push(doc.data() as any);
+      ticketsKV.push(doc.data() as Ticket);
     });
 
     res.json(ticketsKV);
   } catch (error) {
-    res.sendStatus(503);
+    res.status(500).send(errorTypes[500]);
   }
 };
 
@@ -60,7 +64,8 @@ export const generateOnetimeNonce = async (
 ) => {
   try {
     if (!req.currentUser?.sub || !req.body.ids || req.body.ids.length === 0) {
-      throw null;
+      res.status(400).send(errorTypes[400]);
+      return;
     }
 
     const tickets = await firestore
@@ -68,23 +73,24 @@ export const generateOnetimeNonce = async (
       .where("id", "in", req.body.ids)
       .get();
     tickets.forEach((ticket) => {
-      const ticketKV: Ticket = ticket.data() as any;
+      const ticketKV = ticket.data() as Ticket;
       if (ticketKV.used_at || ticketKV.user_id !== req.currentUser?.sub) {
-        throw null;
+        res.status(400).send(errorTypes[400]);
+        return;
       }
     });
 
     const nonce = uuid.v4();
-    const expired_at = dayjs().add(5, "minutes").unix();
+    const expiredAt = dayjs().add(5, "minutes").unix();
 
     await firestore
       .collection("pointTicketNonces")
       .doc(nonce)
-      .set({point_ticket_ids: req.body.ids, expired_at});
+      .set({point_ticket_ids: req.body.ids, expired_at: expiredAt});
 
-    res.json({nonce, expired_at});
+    res.json({nonce, expired_at: expiredAt});
   } catch (error) {
-    res.sendStatus(503);
+    res.status(500).send(errorTypes[500]);
   }
 };
 
@@ -98,57 +104,81 @@ export const getPointTicketPrice = async (
       !req.query.nonce ||
       typeof req.query.nonce !== "string"
     ) {
-      throw "invalid request";
+      res.status(400).send(errorTypes[400]);
+      return;
     }
 
     const nonce = (
       await firestore.collection("pointTicketNonces").doc(req.query.nonce).get()
     ).data();
-    if (!nonce || dayjs().unix() > nonce.expired_at) throw "invalid nonce";
+    if (!nonce || dayjs().unix() > nonce.expired_at) {
+      res.status(400).send({...errorTypes[400], detail: "invalid nonce"});
+      return;
+    }
 
     const pointTickets = await firestore
       .collection("pointTickets")
       .where("id", "in", nonce.point_ticket_ids)
       .get();
-    if (pointTickets.docs.length === 0) throw "no tickets";
+    if (pointTickets.docs.length === 0) {
+      res.status(400).send({...errorTypes[400]});
+      return;
+    }
     let price = 0;
     pointTickets.forEach((ticket) => {
-      const ticketVK: Ticket = ticket.data() as any;
+      const ticketVK = ticket.data() as Ticket;
       if (ticketVK.used_at || ticketVK.shop_id) {
-        throw "ticket already used";
+        res
+          .status(400)
+          .send({...errorTypes[400], detail: "ticket already used"});
+        return;
       }
       price += ticketVK.amount;
     });
 
     res.json({price});
   } catch (error) {
-    console.log(error);
-    res.sendStatus(403);
+    res.status(500).send(errorTypes[500]);
   }
 };
 
 export const usePointTicket = async (req: ExtendRequest, res: Response) => {
   try {
-    if (!req.currentShop?.uid || !req.body.nonce) throw "invalid request";
+    if (!req.currentShop?.uid || !req.body.nonce) {
+      res.status(400).send(errorTypes[400]);
+      return;
+    }
 
     const shop = (
       await firestore.collection("shops").doc(req.currentShop.uid).get()
     ).data();
-    if (!shop || !shop.active) throw "invalid shop";
+    if (!shop || !shop.active) {
+      res.status(401).send({...errorTypes[401], detail: "shop is not active"});
+      return;
+    }
 
     const nonce = (
       await firestore.collection("pointTicketNonces").doc(req.body.nonce).get()
     ).data();
-    if (!nonce || dayjs().unix() > nonce.expired_at) throw "invalid nonce";
+    if (!nonce || dayjs().unix() > nonce.expired_at) {
+      res.status(400).send({...errorTypes[400], detail: "invalid nonce"});
+      return;
+    }
     const pointTickets = await firestore
       .collection("pointTickets")
       .where("id", "in", nonce.point_ticket_ids)
       .get();
-    if (pointTickets.docs.length === 0) throw "no tickets";
+    if (pointTickets.docs.length === 0) {
+      res.status(400).send({...errorTypes[400]});
+      return;
+    }
     pointTickets.forEach((ticket) => {
-      const ticketKV: Ticket = ticket.data() as any;
+      const ticketKV = ticket.data() as Ticket;
       if (ticketKV.used_at || ticketKV.shop_id) {
-        throw "ticket already used";
+        res
+          .status(400)
+          .send({...errorTypes[400], detail: "ticket already used"});
+        return;
       }
     });
 
@@ -163,7 +193,6 @@ export const usePointTicket = async (req: ExtendRequest, res: Response) => {
 
     res.json({status: "success"});
   } catch (error) {
-    console.log(error);
-    res.sendStatus(403);
+    res.status(500).send(errorTypes[500]);
   }
 };

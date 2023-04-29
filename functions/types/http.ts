@@ -20,7 +20,7 @@ export type FirebaseAuthData = {
   email_verified: boolean
   auth_time: number
   user_id: string
-  firebase: { identities: { email: any[] }; sign_in_provider: string }
+  firebase: { identities: { email: string[] }; sign_in_provider: string }
   iat: number
   exp: number
   aud: string
