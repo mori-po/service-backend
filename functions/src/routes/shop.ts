@@ -7,6 +7,7 @@ import {
 } from "../controller/pointTicket";
 import {verifyAuthHeader} from "../utils/auth";
 import {shopMe} from "../controller/shop";
+import {errorTypes} from "../utils/errorHandling";
 
 export const shop = functions
   .region("asia-northeast1")
@@ -17,18 +18,15 @@ export const shop = functions
         if (req.method === "GET") {
           req = await verifyAuthHeader(req, res);
           await shopMe(req, res);
-          return;
         }
         break;
       case "/pointticket":
         if (req.method === "GET") {
           req = await verifyAuthHeader(req, res);
           await getPointTicketPrice(req, res);
-          return;
         } else if (req.method === "POST") {
           req = await verifyAuthHeader(req, res);
           await usePointTicket(req, res);
-          return;
         }
         break;
       case "/pointticket/history":
@@ -41,9 +39,6 @@ export const shop = functions
       default:
         break;
       }
-
-      res.statusCode = 404;
-      res.statusMessage = "Not found";
-      res.send();
+      res.status(405).send(errorTypes[405]);
     });
   });

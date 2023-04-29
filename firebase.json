@@ -29,6 +29,10 @@
         {
           "source": "/shop",
           "functions": "shop"
+        },
+        {
+          "source": "/admin",
+          "functions": "admin"
         }
       ]
     }

@@ -6,6 +6,7 @@ import {
   mockPointVoucher,
 } from "../controller/pointVoucher";
 import {verifyAuthHeader} from "../utils/auth";
+import {errorTypes} from "../utils/errorHandling";
 
 export const pointvoucher = functions
   .region("asia-northeast1")
@@ -29,8 +30,6 @@ export const pointvoucher = functions
         break;
       }
 
-      res.statusCode = 404;
-      res.statusMessage = "Not found";
-      res.send();
+      res.status(405).send(errorTypes[405]);
     });
   });

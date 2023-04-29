@@ -5,6 +5,7 @@ import {Voucher} from "../../types/voucher";
 import * as dayjs from "dayjs";
 import {Ticket} from "../../types/ticket";
 import {v4} from "uuid";
+import {errorTypes} from "../utils/errorHandling";
 
 const firestore = admin.firestore();
 
@@ -12,7 +13,7 @@ export const findPointVaucher = async (req: Request, res: Response) => {
   try {
     const id = req.query.id;
     if (!id || typeof id !== "string") {
-      res.sendStatus(404);
+      res.status(404).send(errorTypes[404]);
       return;
     }
 
@@ -23,10 +24,10 @@ export const findPointVaucher = async (req: Request, res: Response) => {
     if (voucher) {
       res.json(voucher);
     } else {
-      res.sendStatus(404);
+      res.status(404).send(errorTypes[404]);
     }
   } catch (error) {
-    res.sendStatus(404);
+    res.status(500).send(errorTypes[500]);
   }
   return;
 };
@@ -35,7 +36,7 @@ export const earnPointTicket = async (req: ExtendRequest, res: Response) => {
   try {
     const id = req.body.id;
     if (!id || typeof id !== "string" || !req.currentUser) {
-      res.sendStatus(403);
+      res.status(400).send(errorTypes[400]);
       return;
     }
 
@@ -43,11 +44,11 @@ export const earnPointTicket = async (req: ExtendRequest, res: Response) => {
       await firestore.collection("pointVouchers").doc(id).get()
     ).data() as Voucher;
     if (!voucher) {
-      res.sendStatus(404);
+      res.status(404).send(errorTypes[404]);
       return;
     }
     if (dayjs().diff(voucher.expired_at) < 0) {
-      res.sendStatus(403);
+      res.status(400).send({...errorTypes[400], detail: "expired"});
       return;
     }
 
@@ -59,7 +60,7 @@ export const earnPointTicket = async (req: ExtendRequest, res: Response) => {
         .get()
     ).docs as any;
     if (tickets.length == voucher.max_receivable_tickets) {
-      res.sendStatus(403);
+      res.status(400).send({...errorTypes[400], detail: "reached max limit"});
       return;
     }
 
@@ -78,7 +79,7 @@ export const earnPointTicket = async (req: ExtendRequest, res: Response) => {
 
     res.sendStatus(200);
   } catch (error) {
-    res.sendStatus(403);
+    res.status(500).send(errorTypes[500]);
   }
 };
 
