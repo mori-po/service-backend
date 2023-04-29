@@ -1,13 +1,14 @@
 import * as admin from "firebase-admin";
 import {Response} from "firebase-functions/v1";
 import {ExtendRequest} from "../../types/http";
+import {errorTypes} from "../utils/errorHandling";
 
 const firestore = admin.firestore();
 
 export const shopMe = async (req: ExtendRequest, res: Response) => {
   try {
     if (!req.currentShop) {
-      res.sendStatus(503);
+      res.status(401).send(errorTypes[401]);
       return;
     }
 
@@ -17,12 +18,12 @@ export const shopMe = async (req: ExtendRequest, res: Response) => {
       .get();
 
     if (!shop) {
-      res.sendStatus(404);
+      res.status(404).send(errorTypes[404]);
       return;
     }
 
     res.json(shop.data());
   } catch (error) {
-    res.sendStatus(503);
+    res.status(500).send(errorTypes[500]);
   }
 };

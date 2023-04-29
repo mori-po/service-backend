@@ -5,6 +5,7 @@ import {
   listHoldingPointTickets,
 } from "../controller/pointTicket";
 import {verifyAuthHeader} from "../utils/auth";
+import {errorTypes} from "../utils/errorHandling";
 
 export const pointticket = functions
   .region("asia-northeast1")
@@ -26,8 +27,6 @@ export const pointticket = functions
         }
         break;
       }
-      res.statusCode = 404;
-      res.statusMessage = "Not found";
-      res.send();
+      res.status(405).send(errorTypes[405]);
     });
   });

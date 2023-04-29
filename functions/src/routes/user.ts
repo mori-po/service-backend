@@ -2,6 +2,7 @@ import * as functions from "firebase-functions";
 import {cors} from "../utils/cors";
 import {deleteUser, getMe, signupUser} from "../controller/user";
 import {verifyAuthHeader} from "../utils/auth";
+import {errorTypes} from "../utils/errorHandling";
 
 export const user = functions
   .region("asia-northeast1")
@@ -10,7 +11,6 @@ export const user = functions
       switch (req.path) {
       case "/":
         if (req.method === "POST") {
-          console.log(req.headers);
           req = await verifyAuthHeader(req, res);
           await signupUser(req, res);
           return;
@@ -27,8 +27,6 @@ export const user = functions
         }
       }
 
-      res.statusCode = 404;
-      res.statusMessage = "Not found";
-      res.send();
+      res.status(405).send(errorTypes[405]);
     });
   });
