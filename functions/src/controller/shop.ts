@@ -1,5 +1,6 @@
 import * as admin from "firebase-admin";
 import {Response} from "firebase-functions/v1";
+import {error} from "firebase-functions/logger";
 import {ExtendRequest} from "../../types/http";
 import {errorTypes} from "../utils/errorHandling";
 
@@ -23,7 +24,8 @@ export const shopMe = async (req: ExtendRequest, res: Response) => {
     }
 
     res.json(shop.data());
-  } catch (error) {
+  } catch (err) {
     res.status(500).send(errorTypes[500]);
+    error(err);
   }
 };

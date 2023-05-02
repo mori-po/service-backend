@@ -7,6 +7,7 @@ import {
   LineVerifiedData,
 } from "../../types/http";
 import {errorTypes} from "./errorHandling";
+import {warn} from "firebase-functions/logger";
 
 const auth = admin.auth();
 
@@ -29,6 +30,7 @@ export const verifyAuthHeader = async (req: ExtendRequest, res: Response) => {
       req.currentUser = data;
     } catch (detail) {
       res.status(403).send({...errorTypes[403], detail});
+      warn(detail);
       process.exit();
     }
   } else if (firebaseAuthToken) {
@@ -39,10 +41,12 @@ export const verifyAuthHeader = async (req: ExtendRequest, res: Response) => {
       req.currentShop = data;
     } catch (detail) {
       res.status(403).send({...errorTypes[403], detail});
+      warn(detail);
       process.exit();
     }
   } else {
     res.status(403).send({...errorTypes[403]});
+    warn("No auth header found");
     process.exit();
   }
 
