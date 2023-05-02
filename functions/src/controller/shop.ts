@@ -1,31 +1,33 @@
-import * as admin from "firebase-admin";
-import {Response} from "firebase-functions/v1";
-import {error} from "firebase-functions/logger";
-import {ExtendRequest} from "../../types/http";
-import {errorTypes} from "../utils/errorHandling";
+import * as admin from 'firebase-admin'
+import { Response } from 'firebase-functions/v1'
+import { error, warn } from 'firebase-functions/logger'
+import { ExtendRequest } from '../../types/http'
+import { errorTypes } from '../utils/errorHandling'
 
-const firestore = admin.firestore();
+const firestore = admin.firestore()
 
 export const shopMe = async (req: ExtendRequest, res: Response) => {
   try {
     if (!req.currentShop) {
-      res.status(401).send(errorTypes[401]);
-      return;
+      warn(errorTypes[401])
+      res.status(401).send(errorTypes[401])
+      return
     }
 
     const shop = await firestore
-      .collection("shops")
+      .collection('shops')
       .doc(req.currentShop.uid)
-      .get();
+      .get()
 
     if (!shop) {
-      res.status(404).send(errorTypes[404]);
-      return;
+      warn(errorTypes[404])
+      res.status(404).send(errorTypes[404])
+      return
     }
 
-    res.json(shop.data());
+    res.json(shop.data())
   } catch (err) {
-    res.status(500).send(errorTypes[500]);
-    error(err);
+    error(err)
+    res.status(500).send(errorTypes[500])
   }
-};
+}
