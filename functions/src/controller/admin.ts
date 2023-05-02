@@ -5,6 +5,7 @@ import { Ticket } from '../../types/ticket'
 import { errorTypes } from '../utils/errorHandling'
 import { Voucher } from '../../types/voucher'
 import { Shop } from '../../types/shop'
+import { error, warn } from 'firebase-functions/logger'
 
 const firestore = admin.firestore()
 
@@ -29,7 +30,8 @@ export const getVoucherList = async (req: Request, res: Response) => {
         })
         .join('<br/>')
     )
-  } catch (error) {
+  } catch (err) {
+    error(err)
     res.status(500).send(errorTypes[500])
     return
   }
@@ -41,6 +43,7 @@ export const getTotalSupplyUsedValueByVoucherId = async (
 ) => {
   try {
     if (!req.query.voucher_id) {
+      warn(errorTypes[400])
       res.status(400).send(errorTypes[400])
       return
     }
@@ -62,7 +65,8 @@ export const getTotalSupplyUsedValueByVoucherId = async (
 
     res.json(clacData)
     return
-  } catch (error) {
+  } catch (err) {
+    error(err)
     res.status(500).send(errorTypes[500])
     return
   }
@@ -84,7 +88,8 @@ export const getTotalSupplyUsedValue = async (req: Request, res: Response) => {
 
     res.json(clacData)
     return
-  } catch (error) {
+  } catch (err) {
+    error(err)
     res.status(500).send(errorTypes[500])
     return
   }
@@ -127,7 +132,8 @@ export const getUsedTicketCSV = async (req: Request, res: Response) => {
     }
 
     res.setHeader('Content-Type', 'text/csv').send(csvString)
-  } catch (error) {
+  } catch (err) {
+    error(err)
     res.status(500).send(errorTypes[500])
     return
   }
