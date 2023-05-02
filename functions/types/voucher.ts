@@ -1,4 +1,5 @@
 export type Voucher = {
+  id: string
   event_name: string
   event_description: string
   event_date: number

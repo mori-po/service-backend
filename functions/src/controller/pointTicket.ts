@@ -169,7 +169,7 @@ export const usePointTicket = async (req: ExtendRequest, res: Response) => {
       .where("id", "in", nonce.point_ticket_ids)
       .get();
     if (pointTickets.docs.length === 0) {
-      res.status(400).send({...errorTypes[400]});
+      res.status(400).send({...errorTypes[400], detail: "invalid nonce"});
       return;
     }
     pointTickets.forEach((ticket) => {
