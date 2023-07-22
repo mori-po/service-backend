@@ -1,12 +1,14 @@
 import * as admin from "firebase-admin";
-import {shops, tickets, vouchers} from "./sampleData";
+import {shops, tickets, vouchers, users} from "./sampleData";
 
 process.env["FIRESTORE_EMULATOR_HOST"] = "localhost:8080";
+process.env["FIREBASE_AUTH_EMULATOR_HOST"]="localhost:9099";
 
 admin.initializeApp({
   projectId: "moripo-service-backend",
 });
 const firestore = admin.firestore();
+const auth = admin.auth();
 
 const importShop = async () => {
   for (const shop of shops) {
@@ -26,11 +28,24 @@ const importTicket = async () => {
   }
 };
 
+const createUser = async () => {
+  for (const user of users) {
+    await auth.createUser(user)
+    .then(async (userRecord) => {
+      console.log('Successfully created new user:', userRecord.uid);
+    })
+    .catch((error) => {
+      console.log('Error creating new user:', error);
+    });
+  }
+};
+
 const importAll = async () => {
   console.log(admin.apps[0]?.firestore());
-  await importShop();
-  await importVoucher();
-  await importTicket();
+  createUser();
+  importShop();
+  importVoucher();
+  importTicket();
 };
 
 importAll();

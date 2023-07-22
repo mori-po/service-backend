@@ -6,7 +6,8 @@
   "scripts": {
     "firebase": "./node_modules/.bin/firebase",
     "serve": "yarn firebase emulators:start",
-    "test": "mocha --reporter spec"
+    "test": "mocha --reporter spec",
+    "sample": "./node_modules/.bin/ts-node functions/scripts/importSampleData.ts"
   },
   "devDependencies": {
     "firebase-functions-test": "^3.0.0",

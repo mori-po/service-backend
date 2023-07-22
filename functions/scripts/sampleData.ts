@@ -1,3 +1,4 @@
+import { CreateRequest } from "firebase-admin/auth";
 import {Shop} from "../types/shop";
 import {Ticket} from "../types/ticket";
 import {Voucher} from "../types/voucher";
@@ -91,5 +92,35 @@ export const tickets: Ticket[] = [
     shop_id: null,
     amount: 100,
     used_at: null,
+  },
+];
+
+export const users: CreateRequest[] = [
+  {
+    uid: "1",
+    email: 'user@example.com',
+    emailVerified: false,
+    password: 'test1234',
+    displayName: 'John Doe',
+    photoURL: 'http://www.example.com/12345678/photo.png',
+    disabled: false,
+  },
+  {
+    uid: "2",
+    email: 'user2@example.com',
+    emailVerified: false,
+    password: 'test1234',
+    displayName: 'John Doe',
+    photoURL: 'http://www.example.com/12345678/photo.png',
+    disabled: false,
+  },
+  {
+    uid: "3",
+    email: 'user3@example.com',
+    emailVerified: false,
+    password: 'test1234',
+    displayName: 'John Doe',
+    photoURL: 'http://www.example.com/12345678/photo.png',
+    disabled: false,
   },
 ];
